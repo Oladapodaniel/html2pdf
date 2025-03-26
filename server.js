@@ -37,12 +37,15 @@ app.post('/generate-pdf', async (req, res) => {
 
     await browser.close();
 
+    // 1) Convert Buffer -> Base64
+    const base64Pdf = pdfBuffer.toString('base64');
+
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=document.pdf',
     });
 
-    res.send(pdfBuffer);
+    res.send(base64Pdf);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error generating PDF');
