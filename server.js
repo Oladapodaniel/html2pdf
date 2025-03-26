@@ -46,6 +46,7 @@ app.post('/generate-pdf', async (req, res) => {
     });
 
     res.send(pdfBuffer);
+    res.status(200).send(Buffer.from(pdfBuffer));
   } catch (err) {
     console.error(err);
     res.status(500).send('Error generating PDF');
