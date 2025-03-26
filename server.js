@@ -559,9 +559,9 @@ const html = `<!DOCTYPE html>
 </script>
 
 </html>`
-generatePdf(html).then(pdf => {
-    const url = URL.createObjectURL(pdf);
-    // window.open(url, '_blank');
-    console.log('PDF generated:', url, pdf);
-    }
-);
+// generatePdf(html).then(pdf => {
+//     const url = URL.createObjectURL(pdf);
+//     // window.open(url, '_blank');
+//     console.log('PDF generated:', url, pdf);
+//     }
+// );
