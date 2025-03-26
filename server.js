@@ -8,49 +8,57 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' })); // allow large HTML
 
 app.post('/generate-pdf', async (req, res) => {
-  const { html } = req.body;
+    const { html } = req.body;
 
-  if (!html) return res.status(400).send('No HTML provided');
+    if (!html) return res.status(400).send('No HTML provided');
 
-  try {
-    const browser = await puppeteer.launch({ 
-        headless: 'new' ,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-          ]
-    });
-    const page = await browser.newPage();
+    try {
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox'
+            ]
+        });
+        const page = await browser.newPage();
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '1in',
-        bottom: '1in',
-        left: '1in',
-        right: '1in'
-      }
-    });
+        footerTemplate = `
+    <div style="font-size:10px; width:100%; text-align:center; 
+                margin:0 auto; padding:5px 0; color:#999;">
+      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+    </div>
+  `;
 
-    await browser.close();
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            footerTemplate,
+            margin: {
+                top: '2.5cm',
+                bottom: '2cm',
+                left: '2.5cm',
+                right: '2cm',
+            }
+        });
 
-    // 1) Convert Buffer -> Base64
-    // const base64Pdf = pdfBuffer.toString('base64');
+        await browser.close();
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=document.pdf',
-    });
+        // 1) Convert Buffer -> Base64
+        // const base64Pdf = pdfBuffer.toString('base64');
 
-    
-    res.status(200).send(Buffer.from(pdfBuffer));
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error generating PDF');
-  }
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename=document.pdf',
+        });
+
+
+        res.status(200).send(Buffer.from(pdfBuffer));
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error generating PDF');
+    }
 });
 
 const PORT = process.env.PORT || 3001;
@@ -58,20 +66,20 @@ app.listen(PORT, () => console.log(`PDF server running on http://localhost:${POR
 
 
 const generatePdf = async (html) => {
-  const response = await fetch('http://localhost:3001/generate-pdf', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ html }),
-  });
+    const response = await fetch('http://localhost:3001/generate-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Error generating PDF');
-  }
+    if (!response.ok) {
+        throw new Error('Error generating PDF');
+    }
 
-  const pdf = await response.blob();
-  return pdf;
+    const pdf = await response.blob();
+    return pdf;
 }
 
 const html = `<!DOCTYPE html>
