@@ -45,7 +45,7 @@ app.post('/generate-pdf', async (req, res) => {
       'Content-Disposition': 'attachment; filename=document.pdf',
     });
 
-    res.send(pdfBuffer);
+    
     res.status(200).send(Buffer.from(pdfBuffer));
   } catch (err) {
     console.error(err);
